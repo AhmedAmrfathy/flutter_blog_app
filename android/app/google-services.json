@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "289460238028",
+    "firebase_url": "https://moonlit-premise-234610.firebaseio.com",
+    "project_id": "moonlit-premise-234610",
+    "storage_bucket": "moonlit-premise-234610.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:289460238028:android:c1e0e105e7cd9a30e9b469",
+        "android_client_info": {
+          "package_name": "com.example.flutterapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "289460238028-tbugcigenemvhel6fv6scbuapde8munq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGp78ga5gGMmWD7s-KZwc9kffTwyM_BY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "289460238028-tbugcigenemvhel6fv6scbuapde8munq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
