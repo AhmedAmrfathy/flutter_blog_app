@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutterapp/providers/groupview_provider.dart';
-import 'package:flutterapp/screens/homeview_screen.dart';
+import 'package:flutterapp/providers/groupview/groupview_provider.dart';
+import 'package:flutterapp/screens/homeview/homeview_screen.dart';
 import 'package:flutterapp/widgets/group_widget.dart';
 import 'package:flutterapp/widgets/groupactivity_widget.dart';
 import 'package:provider/provider.dart';
@@ -86,7 +86,7 @@ class GroupView extends StatelessWidget {
             ],
           ),
         ),
-        HomeView.postswidget()
+       // HomeView.postswidget(context,)
       ],
     );
   }

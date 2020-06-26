@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterapp/providers/authontication_screen_provider.dart';
-import 'package:flutterapp/screens/home_sreen.dart';
+import 'package:flutterapp/screens/homeview/home_sreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

@@ -7,8 +7,26 @@ class AuthonticationScreenProvider with ChangeNotifier {
   String _token;
   String _userid;
   DateTime _expiredata;
+  String _username;
+  String _userprofileimage;
+
  var isloading=false;
- void toogleCheck(){
+
+  String get token {
+    return _token;
+
+  }
+  String get userid {
+    return _userid;
+  }
+  String get username {
+    return _username;
+  }
+  String get userprofileimage {
+    return _userprofileimage;
+  }
+
+  void toogleCheck(){
    isloading=!isloading;
    notifyListeners();
  }
@@ -23,13 +41,32 @@ class AuthonticationScreenProvider with ChangeNotifier {
             'returnSecureToken': true
           }));
       final data = json.decode(respone.body);
+      print(data);
       _token = data['idToken'];
       _userid = data['localId'];
       _expiredata =
           DateTime.now().add(Duration(seconds: int.parse(data['expiresIn'])));
+      try{
+        final url='https://moonlit-premise-234610.firebaseio.com/users/secretdata/$_userid.json?auth=$token';
+        final response=await http.get(url);
+        final data=json.decode(response.body)as Map<String,dynamic>;
+        print(data);
+        data.forEach((key,value){
+         if(key=='imgurl'){
+           _userprofileimage=value;
+         }
+         else if(key=='name'){
+           _username=value;
+         }
+
+        });
+
+      }catch(error){
+        print(error);
+      }
       notifyListeners();
     } catch (error) {
-      return error;
+      print(error) ;
     }
   }
 

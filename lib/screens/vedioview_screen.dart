@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:flutterapp/providers/homeview_provider.dart';
-import 'package:flutterapp/widgets/post_widget.dart';
+import 'package:flutterapp/providers/homeview_providers/homeview_provider.dart';
+import 'package:flutterapp/widgets/post/post_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -79,15 +79,15 @@ class VedioViewScreen extends StatelessWidget {
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (ctx, index) => PostWidget(
-                        circlephoto: object.getvediospost[index].circlephoto,
-                        personname: object.getvediospost[index].personname,
-                        posttime: object.getvediospost[index].posttime,
-                        numberofcomment:
-                            object.getvediospost[index].numberofcomment,
-                        posttext: object.getvediospost[index].posttext,
-                        postvedio: object.getvediospost[index].postvedio,
-                        videoPlayerController: object.listofcontroller[index]),
+                    itemBuilder: (ctx, index) => PostWidget(),
+//                        circlephoto: object.getvediospost[index].circlephoto,
+//                        personname: object.getvediospost[index].personname,
+//                        posttime: object.getvediospost[index].posttime,
+//                        numberofcomment:
+//                            object.getvediospost[index].numberofcomment,
+//                        posttext: object.getvediospost[index].posttext,
+//                        postvedio: object.getvediospost[index].postvedio,
+//                        videoPlayerController: object.listofcontroller[index]),
                     itemCount: object.getvediospost.length,
                   );
                 } else {
