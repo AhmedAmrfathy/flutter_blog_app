@@ -5,6 +5,20 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 
 class HelperMethod {
+  static const Color red=  Color(0xffef5350);
+  static const Color blue=  Color(0xff2196f3);
+  static const Color lightgreen=  Color(0xffccff90);
+  static const Color yellow=  Color(0xffeeff41);
+  static const Color white=  Color(0xffffffff);
+  static const Color lightgrey=  Color(0xffd6d6d6);
+  static const Color black=  Color(0xff000000);
+
+
+
+
+
+
+
   static Duration parseDuration(String s) {
     int hours = 0;
     int minutes = 0;

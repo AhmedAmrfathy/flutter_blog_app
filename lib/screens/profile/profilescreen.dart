@@ -65,9 +65,12 @@ class ProfileScreen extends StatelessWidget {
                           await profiledata
                               .savedata(profiledata.textEditingController.text);
                           Navigator.of(context).pop();
+                          profiledata.changestatus();
+
                         } catch (error) {
                      await     HelperMethod.showerrordialog('sorry an error occurd', context);
                      Navigator.of(context).pop();
+                     profiledata.changestatus();
                         }
                       },
                       shape: RoundedRectangleBorder(

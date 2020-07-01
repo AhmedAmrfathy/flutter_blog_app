@@ -15,6 +15,7 @@ class Post with ChangeNotifier {
   final String postvedio;
   List<ProfileScreenProvider> userslikes;
   List<PostComment> userscommnets;
+  bool isshared;
   bool isliked;
   int likesnum;
   int commentsnum;
@@ -32,6 +33,7 @@ class Post with ChangeNotifier {
     @required this.likesnum = 0,
     this.commentsnum = 0,
     this.isliked = false,
+        this.isshared=false
   });
 
   increaselikes(Post post, String userid, String token,
@@ -120,5 +122,9 @@ class Post with ChangeNotifier {
     userscommnets.add(postComment);
     notifyListeners();
 
+  }
+  switchSharing(){
+    isshared=!isshared;
+    notifyListeners();
   }
 }

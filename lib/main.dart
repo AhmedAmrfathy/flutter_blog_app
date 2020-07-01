@@ -24,12 +24,18 @@ class MyApp extends StatelessWidget {
           update: (ctx, authdata, previousdata) => HomeViewProvider(
               authdata.userid,
               authdata.token,
-              previousdata == null ? [] : previousdata.getposts),
+              authdata.userprofileimage,
+              authdata.username,
+              previousdata == null ? [] : previousdata.getposts??[],
+              previousdata == null ? [] : previousdata.getstories??[]),
         ),
         ChangeNotifierProxyProvider<AuthonticationScreenProvider,
             ProfileScreenProvider>(
-          update: (ctx, authdata, previousdata) =>
-              ProfileScreenProvider(id:authdata.userid,token:authdata.token,username:authdata.username, profilepic:authdata.userprofileimage),
+          update: (ctx, authdata, previousdata) => ProfileScreenProvider(
+              id: authdata.userid,
+              token: authdata.token,
+              username: authdata.username,
+              profilepic: authdata.userprofileimage),
         ),
         // ChangeNotifierProvider.value(value: HomeViewProvider()),
         ChangeNotifierProvider.value(value: GroupViewProvider()),

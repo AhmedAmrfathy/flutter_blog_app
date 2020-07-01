@@ -168,7 +168,7 @@ provider.isloading?CircularProgressIndicator():
             margin: EdgeInsets.only(left: 16),
             child: Align(
               alignment: Alignment.topLeft,
-              child: TextFormField(
+              child: TextFormField(obscureText:hinttext=='Password'||hinttext=='confirm Password'?true:false,
                 decoration: InputDecoration(
                     hintText: hinttext,
                     hintStyle: TextStyle(fontSize: 20),

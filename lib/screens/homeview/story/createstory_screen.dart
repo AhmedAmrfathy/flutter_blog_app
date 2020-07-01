@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:flutterapp/helper/helpermethod.dart';
+import 'package:flutterapp/models/story.dart';
+import 'package:flutterapp/providers/homeview_providers/homeview_provider.dart';
+import 'package:flutterapp/providers/profile/profilescreen_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutterapp/providers/homeview_providers/story/createstory_provider.dart';
 
@@ -8,6 +12,9 @@ class CreateStoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<CreatStoryProvider>(context);
+    final profiledata =
+        Provider.of<ProfileScreenProvider>(context, listen: false);
+    final homeview = Provider.of<HomeViewProvider>(context, listen: false);
     final devicesize = MediaQuery.of(context).size;
     ScreenUtil.init(context,
         width: devicesize.width,
@@ -35,15 +42,38 @@ class CreateStoryScreen extends StatelessWidget {
                     size: ScreenUtil().setHeight(20),
                   ),
                 ),
-                Spacer(),
-                Padding(
-                  padding: EdgeInsets.only(right: 30),
-                  child: Text(
-                    'Create Story',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                Text(
+                  'Create Story',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                ),
+                IconButton(
+                  onPressed: ()async {
+                    await state.uploadImage();
+                    Story story;
+                    if(state.image!=null){
+                      story = Story(profiledata.id, profiledata,
+                          image: state.imageurl);
+                    }else{
+                      story= Story(profiledata.id, profiledata,
+                          textStory: TextStory(
+                              text: state.textEditingController.text,
+                              fontcolor: state.storyfontcolor,
+                              backgroundcolor: state.storycolor),);
+                    }
+                   await homeview.addStory(story);
+                    state.removeimg();
+                   Navigator.of(context).pop();
+                  },
+                  icon: Icon(
+                    Icons.send,
+                    color: state.image != null
+                        ? Colors.blue
+                        : state.textEditingController.text == ''
+                            ? Colors.blueGrey
+                            : Colors.blue,
+                    size: ScreenUtil().setHeight(24),
                   ),
                 ),
-                Spacer(),
               ],
             ),
           ),
@@ -99,9 +129,11 @@ class CreateStoryScreen extends StatelessWidget {
           Expanded(
               child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
+                  width: 400,
+                  height: 300,
                   margin:
                       EdgeInsets.only(top: 10, left: 15, right: 15, bottom: 20),
                   padding: EdgeInsets.only(
@@ -119,6 +151,10 @@ class CreateStoryScreen extends StatelessWidget {
                   child: state.choice == 'text'
                       ? Center(
                           child: TextField(
+                            onChanged: (change) {
+                              state.setstate();
+                            },
+                            controller: state.textEditingController,
                             decoration: InputDecoration(
                                 hintText: 'TXt',
                                 hintStyle: TextStyle(fontSize: 50)),
@@ -132,132 +168,172 @@ class CreateStoryScreen extends StatelessWidget {
                             maxLines: 15,
                           ),
                         )
-                      : Transform.translate(offset: (Offset(0,40)),
-                        child: Container(width: 100,height: 100,
-                          child: ClipRRect(borderRadius: BorderRadius.circular(15),
-                            child: Image.network(
-                                'https://cdn0.iconfinder.com/data/icons/set-app-incredibles/24/Image-01-512.png',
-                                fit: BoxFit.fill,
+                      : state.image != null
+                          ? Container(
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: <Widget>[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                        ScreenUtil().setHeight(15)),
+                                    child: Image.file(
+                                      state.image,
+                                      fit: BoxFit.fill,
+                                      width: devicesize.width - 200,
+                                      height: devicesize.height - 300,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 10,
+                                    left: 10,
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.close,
+                                        color: Colors.black,
+                                        size: ScreenUtil().setHeight(30),
+                                      ),
+                                      onPressed: () {
+                                        state.removeimg();
+                                      },
+                                    ),
+                                  )
+                                ],
                               ),
+                            )
+                          : InkWell(
+                              onTap: () async {
+                                await state.getimage('img');
+                              },
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  width: ScreenUtil().setWidth(100),
+                                  height: ScreenUtil().setHeight(100),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: Image.network(
+                                      'https://cdn0.iconfinder.com/data/icons/set-app-incredibles/24/Image-01-512.png',
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                ),
+                if (state.choice == 'text')
+                  Container(
+                    width: devicesize.width,
+                    color: Colors.transparent,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        IconButton(
+                          icon: Icon(
+                            Icons.format_color_fill,
+                            color: state.storycolor,
+                            size: 30,
                           ),
                         ),
-                      ),
-                ),
-                if(state.choice=='text')
-                Container(
-                  width: devicesize.width,
-                  color: Colors.transparent,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          Icons.format_color_fill,
-                          color: state.storycolor,
-                          size: 30,
+                        ColorWidet(HelperMethod.red, () {
+                          state.changeColorStory(HelperMethod.red);
+                        }),
+                        SizedBox(
+                          width: 4,
                         ),
-                      ),
-                      ColorWidet(Colors.red, () {
-                        state.changeColorStory(Colors.red);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.blue, () {
-                        state.changeColorStory(Colors.blue);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.lime, () {
-                        state.changeColorStory(Colors.lime);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.yellow, () {
-                        state.changeColorStory(Colors.yellow);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.white, () {
-                        state.changeColorStory(Colors.white);
-                        ;
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.black54, () {
-                        state.changeColorStory(Colors.black54);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.black, () {
-                        state.changeColorStory(Colors.black);
-                      }),
-                    ],
-                  ),
-                ),
-                if(state.choice=='text')
-                Container(
-                  width: devicesize.width,
-                  color: Colors.transparent,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          Icons.colorize,
-                          color: state.storyfontcolor,
-                          size: 30,
+                        ColorWidet(HelperMethod.blue, () {
+                          state.changeColorStory(HelperMethod.blue);
+                        }),
+                        SizedBox(
+                          width: 4,
                         ),
-                      ),
-                      ColorWidet(Colors.red, () {
-                        state.changeStoryFontColor(Colors.red);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.blue, () {
-                        state.changeStoryFontColor(Colors.blue);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.lime, () {
-                        state.changeStoryFontColor(Colors.lime);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.yellow, () {
-                        state.changeStoryFontColor(Colors.yellow);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.white, () {
-                        state.changeStoryFontColor(Colors.white);
-                        ;
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.black54, () {
-                        state.changeStoryFontColor(Colors.black54);
-                      }),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      ColorWidet(Colors.black, () {
-                        state.changeStoryFontColor(Colors.black);
-                      }),
-                    ],
+                        ColorWidet(HelperMethod.lightgreen, () {
+                          state.changeColorStory(HelperMethod.lightgreen);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.yellow, () {
+                          state.changeColorStory(HelperMethod.yellow);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.white, () {
+                          state.changeColorStory(HelperMethod.white);
+                          ;
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.lightgrey, () {
+                          state.changeColorStory(HelperMethod.lightgrey);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.black, () {
+                          state.changeColorStory(HelperMethod.black);
+                        }),
+                      ],
+                    ),
                   ),
-                ),
-
+                if (state.choice == 'text')
+                  Container(
+                    width: devicesize.width,
+                    color: Colors.transparent,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        IconButton(
+                          icon: Icon(
+                            Icons.colorize,
+                            color: state.storyfontcolor,
+                            size: 30,
+                          ),
+                        ),
+                        ColorWidet(HelperMethod.red, () {
+                          state.changeStoryFontColor(HelperMethod.red);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.blue, () {
+                          state.changeStoryFontColor(HelperMethod.blue);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.lightgreen, () {
+                          state.changeStoryFontColor(HelperMethod.lightgreen);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.yellow, () {
+                          state.changeStoryFontColor(HelperMethod.yellow);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.white, () {
+                          state.changeStoryFontColor(HelperMethod.white);
+                          ;
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.lightgrey, () {
+                          state.changeStoryFontColor(HelperMethod.lightgrey);
+                        }),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        ColorWidet(HelperMethod.black, () {
+                          state.changeStoryFontColor(HelperMethod.black);
+                        }),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ))

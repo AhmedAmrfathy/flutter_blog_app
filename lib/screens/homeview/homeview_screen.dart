@@ -8,6 +8,7 @@ import 'package:flutterapp/providers/profile/profilescreen_provider.dart';
 import 'package:flutterapp/screens/homeview/story/createstory_screen.dart';
 import 'package:flutterapp/screens/homeview/story/stories_screen.dart';
 import 'package:flutterapp/screens/profile/profilescreen.dart';
+import 'package:flutterapp/screens/profile/profilescreendata.dart';
 import 'package:flutterapp/widgets/createpost.dart';
 import 'package:flutterapp/widgets/post/post_widget.dart';
 import 'package:flutterapp/widgets/story_widget.dart';
@@ -16,7 +17,7 @@ import 'package:flutterapp/providers/homeview_providers/story/createstory_provid
 
 class HomeView extends StatefulWidget {
   static Widget postswidget(
-      BuildContext context, HomeViewProvider homeViewProvider) {
+      BuildContext context,) {
     return FutureBuilder(
       future: Provider.of<HomeViewProvider>(context, listen: false).getPosts(),
       builder: (ctx, snapshotdata) {
@@ -27,7 +28,7 @@ class HomeView extends StatefulWidget {
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
-                  value: homeViewProvider.getposts[index],
+                  value: data.getposts[index],
                   child: PostWidget(
 
 //                    circlephoto: data.getposts[index].circlephoto,
@@ -60,8 +61,9 @@ class HomeView extends StatefulWidget {
   @override
   _HomeViewState createState() => _HomeViewState();
 }
-
 class _HomeViewState extends State<HomeView> {
+
+
   Widget icontext(Color color, IconData iconData, String word) {
     return FlatButton.icon(
         padding: EdgeInsets.all(1),
@@ -73,7 +75,10 @@ class _HomeViewState extends State<HomeView> {
         label: Text(word));
   }
 
-  Widget basecontainer(Size devicesize, BuildContext context) {
+  Widget basecontainer(
+    Size devicesize,
+    BuildContext context,
+  ) {
     return Container(
         width: devicesize.width,
         height: devicesize.height * .5,
@@ -82,7 +87,7 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             firstbasewidget(devicesize, context),
-            storywidget(devicesize),
+            storywidget(devicesize,context),
           ],
         ));
   }
@@ -105,7 +110,7 @@ class _HomeViewState extends State<HomeView> {
                   onTap: () {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (ctx) {
-                      return ProfileScreen();
+                      return ProfileScreenData();
                     }));
                   },
                   child: Consumer<ProfileScreenProvider>(
@@ -160,51 +165,68 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget storywidget(Size devicesize) {
-    return Consumer<HomeViewProvider>(
-      builder: (ctx, object, child) => Container(
-          width: devicesize.width,
-          height: devicesize.height * .33,
-          margin: EdgeInsets.only(bottom: ScreenUtil().setHeight(9)),
-          padding: EdgeInsets.only(
-              top: ScreenUtil().setHeight(13),
-              bottom: ScreenUtil().setHeight(10),
-              left: ScreenUtil().setHeight(17)),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (ctx, index) => InkWell(
-              onTap: () {
-                if (index == 0) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (ctx) => ChangeNotifierProvider(
-                          create: (ctx) => CreatStoryProvider(),
-                          child: CreateStoryScreen())));
-                } else {
-                  Navigator.of(context).push(PageRouteBuilder(
-                      pageBuilder: (ctx, Animation<double> animation,
-                          Animation<double> secanimation) {
-                        return StoriesScreen(object, index);
+  Widget storywidget(
+    Size devicesize,
+      BuildContext context
+  ) {
+    return FutureBuilder(
+      future: ft,
+      builder: (ctx, snapshotdata) {
+        if (snapshotdata.connectionState == ConnectionState.done) {
+          return Consumer<HomeViewProvider>(
+            builder: (ctx, object, child) {
+              return Container(
+                  width: devicesize.width,
+                  height: devicesize.height * .33,
+                  margin: EdgeInsets.only(bottom: ScreenUtil().setHeight(9)),
+                  padding: EdgeInsets.only(
+                      top: ScreenUtil().setHeight(13),
+                      bottom: ScreenUtil().setHeight(10),
+                      left: ScreenUtil().setHeight(17)),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (ctx, index) => InkWell(
+                      onTap: () {
+                        if (index == 0) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (ctx) => ChangeNotifierProvider(
+                                  create: (ctx) => CreatStoryProvider(),
+                                  child: CreateStoryScreen())));
+                        } else {
+                          Navigator.of(context).push(PageRouteBuilder(
+                              pageBuilder: (ctx, Animation<double> animation,
+                                  Animation<double> secanimation) {
+                                return StoriesScreen(object, index);
+                              },
+                              transitionDuration: Duration(seconds: 1),
+                              transitionsBuilder: (ctx,
+                                  Animation<double> animation,
+                                  Animation<double> secanimation,
+                                  Widget child) {
+                                animation = CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeInOutQuad);
+                                return ScaleTransition(
+                                  scale: animation,
+                                  child: child,
+                                  alignment: Alignment.centerLeft,
+                                );
+                              }));
+                        }
                       },
-                      transitionDuration: Duration(seconds: 1),
-                      transitionsBuilder: (ctx, Animation<double> animation,
-                          Animation<double> secanimation, Widget child) {
-                        animation = CurvedAnimation(
-                            parent: animation, curve: Curves.easeInOutQuad);
-                        return ScaleTransition(
-                          scale: animation,
-                          child: child,
-                          alignment: Alignment.centerLeft,
-                        );
-                      }));
-                }
-              },
-              child: StoryWidget(
-                  object.getstories[index].photo,
-                  object.getstories[index].text,
-                  object.getstories[index].circlephoto),
-            ),
-            itemCount: object.getstories.length,
-          )),
+                      child: StoryWidget(
+                        index==0?Provider.of<ProfileScreenProvider>(context,listen: false).profilepic==null?'https://skillquo.com/wp-content/uploads/2016/10/user-avatar.png':Provider.of<ProfileScreenProvider>(context,listen: false).profilepic:  object.getstories[index].image,
+                          object.getstories[index].textStory==null?null:object.getstories[index].textStory,
+                          object.getstories[index].userdata,index),
+                    ),
+                    itemCount: object.getstories.length,
+                  ));
+            },
+          );
+        } else  {
+          return CircularProgressIndicator();
+        }
+      },
     );
   }
 
@@ -226,14 +248,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    final profiledata = Provider.of<ProfileScreenProvider>(context);
     final devicesize = MediaQuery.of(context).size;
-    final homeviewprovider =
-        Provider.of<HomeViewProvider>(context, listen: false);
-    ScreenUtil.init(context,
-        width: devicesize.width,
-        height: devicesize.height,
-        allowFontScaling: false);
     ScreenUtil.init(context,
         width: devicesize.width,
         height: devicesize.height,
@@ -241,8 +256,16 @@ class _HomeViewState extends State<HomeView> {
     return ListView(
       children: <Widget>[
         basecontainer(devicesize, context),
-        HomeView.postswidget(context, homeviewprovider),
+        HomeView.postswidget(
+          context,
+        ),
       ],
     );
+  }
+  Future<void>ft;
+
+  @override
+  void initState() {
+    ft= Provider.of<HomeViewProvider>(context, listen: false).getStories();
   }
 }

@@ -13,6 +13,8 @@ import 'package:flutterapp/providers/profile/profilescreen_provider.dart';
 import 'package:flutterapp/widgets/post/postcomment.dart';
 import 'package:flutterapp/widgets/post/postlikes.dart';
 import 'package:intl/intl.dart';
+import 'package:loading/indicator/ball_pulse_indicator.dart';
+import 'package:loading/loading.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -382,11 +384,18 @@ class PostWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Container(padding: EdgeInsets.only(top:10, ),
+                        Container(
+                          padding: EdgeInsets.only(
+                            top: 10,
+                          ),
                           child: Consumer<Post>(
                             builder: (ctx, data, ch) => data.commentsnum == 0
                                 ? Text('')
-                                : Text('${data.commentsnum.toString()} comments',style: TextStyle(fontSize: ScreenUtil().setSp(15)),),
+                                : Text(
+                                    '${data.commentsnum.toString()} comments',
+                                    style: TextStyle(
+                                        fontSize: ScreenUtil().setSp(15)),
+                                  ),
                           ),
                         ),
                         Spacer(),
@@ -411,24 +420,37 @@ class PostWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        postactivitywidget(
-                            text: 'مشاركه',
-                            iconData: Icons.forward_5,
-                            iconsize: 30,
-                            iconcolor: Colors.black54),
-                        postactivitywidget(
-                            text: 'تعليق',
-                            iconData: Icons.message,
-                            iconsize: 30,
-                            iconcolor: Colors.black54,
-                            func: () {
-                              showcommentsheet(
-                                  homescreenprovider.context,
-                                  devicesize,
-                                  commentSheetdata,
-                                  postdata,
-                                  profiledata);
-                            }),
+                       Expanded(
+                         child: Consumer<Post>(builder: (ctx,data,ch){
+                           return postdata.isshared?Center(
+                             child: Loading(indicator: BallPulseIndicator(),color: Colors.pink),
+                           ):
+                           postactivitywidget(
+                               text: 'مشاركه',
+                               iconData: Icons.forward_5,
+                               iconsize: 30,
+                               iconcolor: Colors.black54,func: () async{
+                                 data.switchSharing();
+                             await  Provider.of<HomeViewProvider>(context,listen: false).sharePost(postdata.id);
+                             data.switchSharing();
+                           });
+                         },),
+                       ),
+                        Expanded(
+                          child: postactivitywidget(
+                              text: 'تعليق',
+                              iconData: Icons.message,
+                              iconsize: 30,
+                              iconcolor: Colors.black54,
+                              func: () {
+                                showcommentsheet(
+                                    homescreenprovider.context,
+                                    devicesize,
+                                    commentSheetdata,
+                                    postdata,
+                                    profiledata);
+                              }),
+                        ),
                         Consumer<Post>(
                           builder: (ctx, data, child) => Expanded(
                               child: FlatButton.icon(
@@ -439,15 +461,23 @@ class PostWidget extends StatelessWidget {
                                         authdata.token,
                                         profiledata);
                                   },
-                                  icon: Icon(
-                                    data.isliked
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    size: ScreenUtil().setHeight(30),
+                                  icon: Image.asset(
+                                    'assets/images/like.png',
                                     color: data.isliked
                                         ? Colors.blue
                                         : Colors.black54,
+                                    height: 30,
+                                    width: 24,
                                   ),
+//                                  icon: Icon(
+//                                    data.isliked
+//                                        ? Icons.favorite
+//                                        : Icons.favorite_border,
+//                                    size: ScreenUtil().setHeight(30),
+//                                    color: data.isliked
+//                                        ? Colors.blue
+//                                        : Colors.black54,
+//                                  ),
                                   label: Text(
                                     'أعجبنى',
                                     style: data.isliked

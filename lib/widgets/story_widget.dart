@@ -1,11 +1,15 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterapp/models/story.dart';
+import 'package:flutterapp/providers/profile/profilescreen_provider.dart';
 
 class StoryWidget extends StatelessWidget {
   final String photo;
-  final String text;
-  final String circlephoto;
+  final TextStory textstory;
+  final ProfileScreenProvider userdata;
+  final int index;
 
-  StoryWidget(this.photo, this.text, this.circlephoto);
+  StoryWidget(this.photo, this.textstory, this.userdata, this.index);
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +21,27 @@ class StoryWidget extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            child: Image.network(
-              photo,
-              fit: BoxFit.fill,
+          if (photo != null)
+            ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              child: Image.network(
+                photo,
+                fit: BoxFit.fill,
+              ),
             ),
-          ),
+          if (textstory != null)
+            Container(
+              padding: EdgeInsets.only(top: 35, left: 20, right: 20),
+              decoration: BoxDecoration(
+                  color: Color(textstory.backgroundcolor.value),
+                  borderRadius: BorderRadius.circular(10)),
+              child: AutoSizeText(
+                textstory.text,
+                style: TextStyle(
+                    color: Color(textstory.fontcolor.value), height: 1.5),
+                textAlign: TextAlign.center,
+              ),
+            ),
           Positioned(
             top: 5,
             left: 5,
@@ -35,16 +53,16 @@ class StoryWidget extends StatelessWidget {
                   border: Border.all(color: Colors.blueAccent)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(30),
-                child: Image.network(circlephoto),
+                child: Image.network(userdata.profilepic),
               ),
             ),
           ),
           Positioned(
-            bottom: 6,
+            bottom: 10,
             left: 3,
             child: Text(
-              text,
-              style: TextStyle(color: Colors.white,fontSize: 15),
+              index == 0 ? 'Add to your Story' : userdata.username,
+              style: TextStyle(color: Colors.white, fontSize: 15),
             ),
           )
         ],

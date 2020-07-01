@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutterapp/models/post.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,6 +14,7 @@ class ProfileScreenProvider with ChangeNotifier {
   String profilepic;
 
   ProfileScreenProvider({this.id, this.token, this.username, this.profilepic});
+
 
   String profileimage;
   TextEditingController textEditingController = new TextEditingController();
@@ -56,9 +58,12 @@ class ProfileScreenProvider with ChangeNotifier {
     try {
       final response = await http.put(url,
           body: json.encode({'imgurl': profileimage, 'name': name}));
+      username=name;
       notifyListeners();
     } catch (error) {
       throw error;
     }
   }
+
+
 }
