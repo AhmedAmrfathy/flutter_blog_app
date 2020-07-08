@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutterapp/providers/home_provider.dart';
 import 'package:flutterapp/screens/groupview/groupview_screen.dart';
 import 'package:flutterapp/screens/homeview/homeview_screen.dart';
-import 'package:flutterapp/screens/tryingscreen.dart';
-import 'package:flutterapp/screens/vedioview_screen.dart';
+import 'package:flutterapp/screens/settingview/settingsscreen.dart';
+import 'package:flutterapp/screens/vedioview/vedioview_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
     final devicesize = MediaQuery.of(context).size;
     Provider.of<HomeProvider>(context,listen: false).editcontext(context);
     return DefaultTabController(
-      length: 6,
+      length: 5,
       initialIndex: 0,
       child: Scaffold(
         appBar: AppBar(
@@ -65,12 +65,7 @@ class HomeScreen extends StatelessWidget {
                 color: Colors.grey,
                 size: 30,
               )),
-              Tab(
-                  icon: Icon(
-                Icons.card_giftcard,
-                color: Colors.grey,
-                size: 30,
-              )),
+
               Tab(
                   icon: Icon(
                 Icons.notifications_none,
@@ -92,8 +87,7 @@ class HomeScreen extends StatelessWidget {
             GroupView(),
             VedioViewScreen(),
             GroupView(),
-            GroupView(),
-            TryingScreen(),
+            SettingsView(),
           ],
         ),
 

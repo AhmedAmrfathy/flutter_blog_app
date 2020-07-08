@@ -4,9 +4,13 @@ import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutterapp/helper/helpermethod.dart';
 import 'package:flutterapp/models/story.dart';
 import 'package:flutterapp/providers/homeview_providers/homeview_provider.dart';
+import 'package:flutterapp/providers/homeview_providers/posts/createpost_provider.dart';
+import 'package:flutterapp/providers/homeview_providers/story/createstory_provider.dart';
 import 'package:flutterapp/providers/profile/profilescreen_provider.dart';
 import 'package:flutterapp/screens/homeview/homeview_screen.dart';
+import 'package:flutterapp/screens/homeview/story/createstory_screen.dart';
 import 'package:flutterapp/screens/profile/profilescreen.dart';
+import 'package:flutterapp/widgets/createpost.dart';
 import 'package:flutterapp/widgets/post/post_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +21,7 @@ class ProfileScreenData extends StatefulWidget {
 
 class _ProfileScreenDataState extends State<ProfileScreenData> {
   Future<void> future;
+  Future<void>futurephotos;
 
   Widget icontext(Color color, IconData iconData, String word) {
     return FlatButton.icon(
@@ -29,12 +34,29 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
         label: Text(word));
   }
 
+  void showpostcreatepage(BuildContext context, Size devicesize) async {
+    showModalBottomSheet(
+        isScrollControlled: true,
+        isDismissible: true,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              return ChangeNotifierProvider(
+                  create: (ctx) => CreatePostProvider(),
+                  child: CreatePost(devicesize));
+            },
+          );
+        });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     future = Provider.of<HomeViewProvider>(context, listen: false)
         .getPosts(sharing: true);
+    futurephotos=Provider.of<ProfileScreenProvider>(context,listen: false).getPhotos();
   }
 
   @override
@@ -46,14 +68,7 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
         height: devicesize.height,
         allowFontScaling: false);
 
-    List<String> list = [
-      'https://7nen.net/wp-content/uploads/2019/07/2544.jpg',
-      'https://i2.wp.com/www.newphotodownload.info/wp-content/uploads/2019/12/%D8%B5%D9%88%D8%B1-%D8%A8%D9%86%D8%A7%D8%AA-%D8%B5%D8%BA%D8%A7%D8%B1-2020-35.jpg?ssl=1',
-      'https://i2.wp.com/www.newphotodownload.info/wp-content/uploads/2019/12/%D8%B5%D9%88%D8%B1-%D8%A8%D9%86%D8%A7%D8%AA-%D8%B5%D8%BA%D8%A7%D8%B1-2020-35.jpg?ssl=1',
-      'https://i2.wp.com/www.newphotodownload.info/wp-content/uploads/2019/12/%D8%B5%D9%88%D8%B1-%D8%A8%D9%86%D8%A7%D8%AA-%D8%B5%D8%BA%D8%A7%D8%B1-2020-35.jpg?ssl=1',
-      'https://i2.wp.com/www.newphotodownload.info/wp-content/uploads/2019/12/%D8%B5%D9%88%D8%B1-%D8%A8%D9%86%D8%A7%D8%AA-%D8%B5%D8%BA%D8%A7%D8%B1-2020-35.jpg?ssl=1',
-      'https://i2.wp.com/www.newphotodownload.info/wp-content/uploads/2019/12/%D8%B5%D9%88%D8%B1-%D8%A8%D9%86%D8%A7%D8%AA-%D8%B5%D8%BA%D8%A7%D8%B1-2020-35.jpg?ssl=1'
-    ];
+
     return Scaffold(
         body: Padding(
       padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
@@ -74,7 +89,7 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
                     color: Colors.black54,
                     size: 24,
                   ),
-                  onPressed: (){
+                  onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
@@ -171,7 +186,9 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
                                         borderRadius:
                                             BorderRadius.circular(100),
                                         child: Image.network(
-                                          user.profilepic==null?'https://skillquo.com/wp-content/uploads/2016/10/user-avatar.png':user.profilepic,
+                                          user.profilepic == null
+                                              ? 'https://i0.wp.com/bsnl.ch/wp-content/uploads/2019/03/avatar-default-circle.png?fit=260%2C260&ssl=1'
+                                              : user.profilepic,
                                           fit: BoxFit.fill,
                                         )),
                                   ),
@@ -180,7 +197,9 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
                                   height: 13,
                                 ),
                                 Text(
-                                  user.username==null?'new user':user.username,
+                                  user.username == null
+                                      ? 'new user'
+                                      : user.username,
                                   style: TextStyle(
                                       fontSize: ScreenUtil().setSp(27),
                                       fontWeight: FontWeight.bold),
@@ -207,11 +226,19 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
                             child: FloatingActionButton(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20)),
-                              child: Text(
-                                'Add To Story',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: ScreenUtil().setSp(17)),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (ctx) => ChangeNotifierProvider(
+                                          create: (ctx) => CreatStoryProvider(),
+                                          child: CreateStoryScreen())));
+                                },
+                                child: Text(
+                                  'Add To Story',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: ScreenUtil().setSp(17)),
+                                ),
                               ),
                             ),
                           ),
@@ -238,24 +265,24 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
                           child: Dataelemnt(
                             devicesize: devicesize,
                             icon: Icons.home,
-                            text1: 'Lives in',
-                            text2: ' Mansoura',
+                            text1: 'Lives in ',
+                            text2: user.usercountry==null?'':user.usercountry,
                           ),
                         ),
                         Expanded(
                           child: Dataelemnt(
                             devicesize: devicesize,
                             icon: Icons.favorite,
-                            text1: ' State',
-                            text2: ' Single',
+                            text1: ' State ',
+                            text2: user.userstatus==null?'':user.userstatus,
                           ),
                         ),
                         Expanded(
                           child: Dataelemnt(
                             devicesize: devicesize,
-                            icon: Icons.notifications,
-                            text1: 'Followed by ',
-                            text2: '45 people',
+                            icon: Icons.work,
+                            text1: 'worked as ',
+                            text2: user.userjob==null?'':user.userjob,
                           ),
                         ),
                         SizedBox(
@@ -331,19 +358,21 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
                         ),
                         Expanded(
                           child: Container(
-                            child: GridView.builder(
-                              physics: NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3,
-                                      mainAxisSpacing: 20,
-                                      crossAxisSpacing: 10,
-                                      childAspectRatio: 3 / 3),
-                              itemBuilder: (ctx, index) {
-                                return PhotoWidget(list[index]);
-                              },
-                              itemCount: list.length,
-                            ),
+                            child:Consumer<ProfileScreenProvider>(builder: (ctx,data,child){
+                              return  GridView.builder(
+                                physics: NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    mainAxisSpacing: 20,
+                                    crossAxisSpacing: 10,
+                                    childAspectRatio: 3 / 3),
+                                itemBuilder: (ctx, index) {
+                                  return PhotoWidget(data.photoslist[index]);
+                                },
+                                itemCount: data.photoslist.length,
+                              );
+                            },)
                           ),
                         ),
                         SizedBox(
@@ -428,23 +457,29 @@ class _ProfileScreenDataState extends State<ProfileScreenData> {
                                           borderRadius:
                                               BorderRadius.circular(50),
                                           child: Image.network(
-                                            user.profilepic==null?'https://skillquo.com/wp-content/uploads/2016/10/user-avatar.png':user.profilepic,
+                                            user.profilepic == null
+                                                ? 'https://skillquo.com/wp-content/uploads/2016/10/user-avatar.png'
+                                                : user.profilepic,
                                             fit: BoxFit.fill,
                                           ),
                                         ),
                                       ),
                                       Expanded(
                                         child: TextField(
-                                            decoration: InputDecoration(
-                                                border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            100)),
-                                                labelText:
-                                                    'What`s on your mind?',
-                                                contentPadding: EdgeInsets.only(
-                                                    left: ScreenUtil()
-                                                        .setHeight(17)))),
+                                          decoration: InputDecoration(
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100)),
+                                              labelText: 'What`s on your mind?',
+                                              contentPadding: EdgeInsets.only(
+                                                  left: ScreenUtil()
+                                                      .setHeight(17))),
+                                          onTap: () {
+                                            showpostcreatepage(
+                                                context, devicesize);
+                                          },
+                                        ),
                                       )
                                     ],
                                   ),

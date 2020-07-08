@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutterapp/models/postcomment.dart';
-import 'package:flutterapp/providers/authontication_screen_provider.dart';
+import 'package:flutterapp/providers/authontication/authontication_screen_provider.dart';
 import 'package:flutterapp/providers/groupview/groupview_provider.dart';
 import 'package:flutterapp/providers/home_provider.dart';
 import 'package:flutterapp/providers/homeview_providers/homeview_provider.dart';
 import 'package:flutterapp/providers/homeview_providers/posts/commentsheet.dart';
 import 'package:flutterapp/providers/profile/profilescreen_provider.dart';
-import 'package:flutterapp/screens/authontication_screens.dart';
+import 'package:flutterapp/screens/authontication/authontication_screens.dart';
 import 'package:flutterapp/screens/homeview/home_sreen.dart';
 import 'package:flutterapp/screens/homeview/homeview_screen.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() =>runApp(MyApp());
+
 
 class MyApp extends StatelessWidget {
   @override
@@ -26,8 +27,8 @@ class MyApp extends StatelessWidget {
               authdata.token,
               authdata.userprofileimage,
               authdata.username,
-              previousdata == null ? [] : previousdata.getposts??[],
-              previousdata == null ? [] : previousdata.getstories??[]),
+              previousdata == null ? [] : previousdata.getposts ?? [],
+              previousdata == null ? [] : previousdata.getstories ?? []),
         ),
         ChangeNotifierProxyProvider<AuthonticationScreenProvider,
             ProfileScreenProvider>(
@@ -35,24 +36,29 @@ class MyApp extends StatelessWidget {
               id: authdata.userid,
               token: authdata.token,
               username: authdata.username,
-              profilepic: authdata.userprofileimage),
+              profilepic: authdata.userprofileimage,
+              usercountry: authdata.usercountry,
+              userjob: authdata.userjob,
+              userstatus: authdata.userstatus),
         ),
         // ChangeNotifierProvider.value(value: HomeViewProvider()),
         ChangeNotifierProvider.value(value: GroupViewProvider()),
         ChangeNotifierProvider.value(value: HomeProvider()),
         ChangeNotifierProvider.value(value: CommentSheet())
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        home: AuthonticationScreen(),
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        routes: {
-          HomeScreen.routeforhomescree: (ctx) => HomeScreen(),
-        },
-      ),
+      child:  MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Flutter Demo',
+            home:AuthonticationScreen(),
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+            routes: {
+              HomeScreen.routeforhomescree: (ctx) => HomeScreen(),
+            },
+          )
+
+
     );
   }
 }

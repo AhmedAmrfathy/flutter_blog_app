@@ -35,7 +35,9 @@ class CreateStoryScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                IconButton(
+                IconButton(onPressed: (){
+                  Navigator.of(context).pop();
+                },
                   icon: Icon(
                     Icons.close,
                     color: Colors.black,

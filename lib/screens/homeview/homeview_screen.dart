@@ -16,53 +16,21 @@ import 'package:provider/provider.dart';
 import 'package:flutterapp/providers/homeview_providers/story/createstory_provider.dart';
 
 class HomeView extends StatefulWidget {
-  static Widget postswidget(
-      BuildContext context,) {
-    return FutureBuilder(
-      future: Provider.of<HomeViewProvider>(context, listen: false).getPosts(),
-      builder: (ctx, snapshotdata) {
-        if (snapshotdata.connectionState == ConnectionState.done) {
-          return Consumer<HomeViewProvider>(
-            builder: (ctx, data, ch) {
-              return ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
-                  value: data.getposts[index],
-                  child: PostWidget(
 
-//                    circlephoto: data.getposts[index].circlephoto,
-//                    posttime: data.getposts[index].posttime,
-//                    posttext: data.getposts[index].posttext,
-//                    postphoto: data.getposts[index].postphoto,
-//                    personname: data.getposts[index].personname,
-//                    numberofcomment: data.getposts[index].numberofcomment,
-//                    postvedio: data.getposts[index].postvedio,
-//                    videoPlayerController: data.listofcontroller.isEmpty
-//                        ? null
-//                        : data.listofcontroller[index],
-                      ),
-                ),
-                itemCount: data.getposts.length,
-              );
-            },
-          );
-        } else {
-          return Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 10,
-            ),
-          );
-        }
-      },
-    );
-  }
 
   @override
   _HomeViewState createState() => _HomeViewState();
 }
 class _HomeViewState extends State<HomeView> {
+  Future<void>ft;
+//  Future<void>postfuture;
 
+  @override
+  void initState() {
+    ft= Provider.of<HomeViewProvider>(context, listen: false).getStories();
+   // postfuture=Provider.of<HomeViewProvider>(context,listen: false).getPosts();
+
+  }
 
   Widget icontext(Color color, IconData iconData, String word) {
     return FlatButton.icon(
@@ -164,6 +132,47 @@ class _HomeViewState extends State<HomeView> {
       ),
     );
   }
+  Widget postswidget(
+      BuildContext context,) {
+    return FutureBuilder(
+      future:Provider.of<HomeViewProvider>(context,listen: false).getPosts() ,
+      builder: (ctx, snapshotdata) {
+        if (snapshotdata.connectionState == ConnectionState.done) {
+          return Consumer<HomeViewProvider>(
+            builder: (ctx, data, ch) {
+              return ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
+                  value: data.getposts[index],
+                  child: PostWidget(
+
+//                    circlephoto: data.getposts[index].circlephoto,
+//                    posttime: data.getposts[index].posttime,
+//                    posttext: data.getposts[index].posttext,
+//                    postphoto: data.getposts[index].postphoto,
+//                    personname: data.getposts[index].personname,
+//                    numberofcomment: data.getposts[index].numberofcomment,
+//                    postvedio: data.getposts[index].postvedio,
+//                    videoPlayerController: data.listofcontroller.isEmpty
+//                        ? null
+//                        : data.listofcontroller[index],
+                  ),
+                ),
+                itemCount: data.getposts.length,
+              );
+            },
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 10,
+            ),
+          );
+        }
+      },
+    );
+  }
 
   Widget storywidget(
     Size devicesize,
@@ -256,16 +265,11 @@ class _HomeViewState extends State<HomeView> {
     return ListView(
       children: <Widget>[
         basecontainer(devicesize, context),
-        HomeView.postswidget(
+        postswidget(
           context,
         ),
       ],
     );
   }
-  Future<void>ft;
 
-  @override
-  void initState() {
-    ft= Provider.of<HomeViewProvider>(context, listen: false).getStories();
-  }
 }

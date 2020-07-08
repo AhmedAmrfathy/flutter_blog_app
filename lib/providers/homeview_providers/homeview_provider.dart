@@ -229,6 +229,7 @@ class HomeViewProvider with ChangeNotifier {
               };
             }).toList(),
           }));
+
       final responsedata = json.decode(response.body);
       Post newpost = new Post(
         post.userslikes,
@@ -243,7 +244,38 @@ class HomeViewProvider with ChangeNotifier {
         likesnum: post.likesnum,
         commentsnum: post.commentsnum,
       );
+      final securl =
+          'https://moonlit-premise-234610.firebaseio.com/users/secretdata/usersshares/$userid/${responsedata['name']}.json?auth=$token';
+      final secresponse = await http.put(securl,
+          body: json.encode({
+            'creatorid': userid,
+            'userprofileimage': post.circlephoto,
+            'username': post.personname,
+            'posttext': post.posttext,
+            'postimageurl': post.postphoto,
+            'postvedio': post.postvedio,
+            'posttime': post.posttime,
+            'postlikes': post.likesnum,
+            'postcomments': post.commentsnum,
+            'userslikes': post.userslikes.map((val) {
+              return {
+                'id': val.id,
+                'token': val.token,
+                'profilepic': val.profilepic,
+                'username': val.username
+              };
+            }).toList(),
+            'userscomments': post.userscommnets.map((val) {
+              return {
+                'id': val.profileScreenProvider.id,
+                'token': val.profileScreenProvider.token,
+                'profilepic': val.profileScreenProvider.profilepic,
+                'username': val.profileScreenProvider.username
+              };
+            }).toList(),
+          }));
       _listpost.add(newpost);
+      _sharinglistpost.add(newpost);
       isloading = false;
       notifyListeners();
     } catch (error) {
@@ -258,24 +290,24 @@ class HomeViewProvider with ChangeNotifier {
     final response = await http.get(url);
     Map<String, dynamic> responsedata =
         json.decode(response.body) as Map<String, dynamic>;
-    print(responsedata);
     final favouriteurl =
         'https://moonlit-premise-234610.firebaseio.com/users/secretdata/$userid/favouritepost.json?auth=$token';
     final favouriteresponse = await http.get(favouriteurl);
     final favouritepostdata =
         json.decode(favouriteresponse.body) as Map<String, dynamic>;
     final List<Post> list = [];
-    if(responsedata==null){
+    if (responsedata == null) {
       sharing ? _sharinglistpost = list : _listpost = list;
       notifyListeners();
-    }else{
+    } else {
       responsedata.forEach((postid, postdata) {
         //for each post
         List<ProfileScreenProvider> listt = List();
         List<PostComment> listofemptycomment = List();
         List<ProfileScreenProvider> listoflikesuser = List();
         if (postdata['userslikes'] != null) {
-          var unformedlikesdata = postdata['userslikes'] as Map<String, dynamic>;
+          var unformedlikesdata =
+              postdata['userslikes'] as Map<String, dynamic>;
           unformedlikesdata.map((id, value) {
             return MapEntry(
                 id,
@@ -290,7 +322,7 @@ class HomeViewProvider with ChangeNotifier {
         }
         if (postdata['userscomments'] != null) {
           var unformeduserscomments =
-          postdata['userscomments'] as Map<String, dynamic>;
+              postdata['userscomments'] as Map<String, dynamic>;
           List<PostComment> formedcommentslist = List();
           var formeduserscomments = unformeduserscomments.map((userid, value) {
             return MapEntry(
@@ -317,12 +349,6 @@ class HomeViewProvider with ChangeNotifier {
           listofemptycomment = formedcommentslist;
         }
 
-//      formeduserscomments.values.toList().forEach((item) {
-//        formedcommentslist.add(item.values);
-//      });
-//      print(formedcommentslist);
-        // unformedlikesdata.map((userid,))
-
         Post post = Post(
             postdata['userslikes'] == null ? listt : listoflikesuser ?? listt,
             listofemptycomment,
@@ -337,20 +363,14 @@ class HomeViewProvider with ChangeNotifier {
             postphoto: postdata['postimageurl'],
             likesnum: postdata['postlikes'],
             commentsnum: postdata['postcomments']);
-
-//          postdata['userslikes'][userid] == null
-//              ? (postdata['userslikes'] as List<dynamic>)
-//                  .map((value) => ProfileScreenProvider(id: value['id']))
-//                  .toList()
         list.add(post);
       });
       sharing ? _sharinglistpost = list : _listpost = list;
       notifyListeners();
     }
-
   }
 
-  sharePost(String postid) async {
+  Future<void> sharePost(String postid) async {
     final url =
         'https://moonlit-premise-234610.firebaseio.com/posts/$postid.json?auth=$token';
     try {
@@ -361,9 +381,29 @@ class HomeViewProvider with ChangeNotifier {
     } catch (error) {}
   }
 
-  getSharedposts() async {
+  Future<void> getSharedposts() async {
     final url =
         'https://moonlit-premise-234610.firebaseio.com/users/secretdata/usersshares/$userid.json?auth=$token';
     getPosts(sharing: true);
+  }
+
+  Future<void> deletepost(String postid) async {
+    final allposturl =
+        'https://moonlit-premise-234610.firebaseio.com/posts/$postid.json?auth=$token';
+    final sharedpostsurl =
+        'https://moonlit-premise-234610.firebaseio.com/users/secretdata/usersshares/$userid/$postid.json?auth=$token';
+    try {
+      await http.delete(allposturl);
+      await http.delete(sharedpostsurl);
+    } catch (error) {
+      print(error);
+    }
+    _listpost.removeWhere((post) {
+      return post.id == postid;
+    });
+    _sharinglistpost.removeWhere((post) {
+      return post.id == postid;
+    });
+    notifyListeners();
   }
 }

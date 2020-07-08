@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutterapp/helper/helpermethod.dart';
 import 'package:flutterapp/models/post.dart';
 import 'package:flutterapp/models/postcomment.dart';
-import 'package:flutterapp/providers/authontication_screen_provider.dart';
+import 'package:flutterapp/providers/authontication/authontication_screen_provider.dart';
 import 'package:flutterapp/providers/home_provider.dart';
 import 'package:flutterapp/providers/homeview_providers/homeview_provider.dart';
 import 'package:flutterapp/providers/homeview_providers/posts/commentsheet.dart';
@@ -18,29 +18,17 @@ import 'package:loading/loading.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
-class PostWidget extends StatelessWidget {
+class PostWidget extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
 
   const PostWidget({Key key, this.videoPlayerController}) : super(key: key);
 
-//  final String circlephoto;
-//  final String personname;
-//  final String posttime;
-//  final String postphoto;
-//  final String posttext;
-//  final String postvedio;
-//  final VideoPlayerController videoPlayerController;
-//  final int numberofcomment;
-//
-//  PostWidget(
-//      {this.circlephoto,
-//      this.personname,
-//      this.posttime,
-//      this.numberofcomment,
-//      this.postphoto,
-//      this.posttext,
-//      this.postvedio,
-//      this.videoPlayerController});
+  @override
+  _PostWidgetState createState() => _PostWidgetState();
+}
+
+class _PostWidgetState extends State<PostWidget> {
+  bool showpostoptions = false;
 
   Widget postactivitywidget(
       {String text,
@@ -283,6 +271,7 @@ class PostWidget extends StatelessWidget {
         Provider.of<HomeProvider>(context, listen: false);
     final commentSheetdata = Provider.of<CommentSheet>(context, listen: false);
     final devicesize = MediaQuery.of(context).size;
+    final homeviewprovider=Provider.of<HomeViewProvider>(context);
     ScreenUtil.init(context,
         width: devicesize.width,
         height: devicesize.height,
@@ -329,13 +318,49 @@ class PostWidget extends StatelessWidget {
                     )
                   ],
                 ),
-                trailing: Padding(
-                    padding:
-                        EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
-                    child: Icon(
-                      Icons.power_input,
-                      size: ScreenUtil().setHeight(20),
-                    )),
+                trailing: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    return showpostoptions
+                        ? Container(
+                            child: Column(
+                              children: <Widget>[
+                                Expanded(
+                                  child: InkWell( onTap: (){
+                                    homeviewprovider.deletepost(postdata.id);
+                                  },
+                                      child: Text('Delete'),
+
+                                  ),
+                                ),
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: (){
+                                      setter((){
+                                        showpostoptions=!showpostoptions;
+                                      });
+                                    },
+                                      child: Text('cancel'),
+                                    
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        : Padding(
+                            padding: EdgeInsets.only(
+                                bottom: ScreenUtil().setHeight(20)),
+                            child: IconButton(
+                              icon: (Icon(
+                                Icons.power_input,
+                                size: ScreenUtil().setHeight(20),
+                              )),
+                           onPressed: (){
+                             setter((){
+                               showpostoptions=!showpostoptions;
+                             });
+                           }, ));
+                  },
+                ),
               ),
               Container(
                 margin: EdgeInsets.only(bottom: ScreenUtil().setHeight(6)),
@@ -355,12 +380,13 @@ class PostWidget extends StatelessWidget {
                       postdata.postphoto,
                       fit: BoxFit.fill,
                     ),
-                  if (videoPlayerController != null)
+                  if (widget.videoPlayerController != null)
                     Stack(
                       children: <Widget>[
                         AspectRatio(
-                          aspectRatio: videoPlayerController.value.aspectRatio,
-                          child: VideoPlayer(videoPlayerController),
+                          aspectRatio:
+                              widget.videoPlayerController.value.aspectRatio,
+                          child: VideoPlayer(widget.videoPlayerController),
                         ),
                         IconButton(
                           icon: Icon(
@@ -369,7 +395,7 @@ class PostWidget extends StatelessWidget {
                             color: Colors.redAccent,
                           ),
                           onPressed: () {
-                            videoPlayerController.play();
+                            widget.videoPlayerController.play();
                           },
                         )
                       ],
@@ -420,22 +446,31 @@ class PostWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                       Expanded(
-                         child: Consumer<Post>(builder: (ctx,data,ch){
-                           return postdata.isshared?Center(
-                             child: Loading(indicator: BallPulseIndicator(),color: Colors.pink),
-                           ):
-                           postactivitywidget(
-                               text: 'مشاركه',
-                               iconData: Icons.forward_5,
-                               iconsize: 30,
-                               iconcolor: Colors.black54,func: () async{
-                                 data.switchSharing();
-                             await  Provider.of<HomeViewProvider>(context,listen: false).sharePost(postdata.id);
-                             data.switchSharing();
-                           });
-                         },),
-                       ),
+                        Expanded(
+                          child: Consumer<Post>(
+                            builder: (ctx, data, ch) {
+                              return postdata.isshared
+                                  ? Center(
+                                      child: Loading(
+                                          indicator: BallPulseIndicator(),
+                                          color: Colors.pink),
+                                    )
+                                  : postactivitywidget(
+                                      text: 'مشاركه',
+                                      iconData: Icons.forward_5,
+                                      iconsize: 30,
+                                      iconcolor: Colors.black54,
+                                      func: () async {
+                                        data.switchSharing();
+                                        await Provider.of<HomeViewProvider>(
+                                                context,
+                                                listen: false)
+                                            .sharePost(postdata.id);
+                                        data.switchSharing();
+                                      });
+                            },
+                          ),
+                        ),
                         Expanded(
                           child: postactivitywidget(
                               text: 'تعليق',

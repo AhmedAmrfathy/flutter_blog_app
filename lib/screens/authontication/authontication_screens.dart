@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutterapp/providers/authontication_screen_provider.dart';
+import 'package:flutterapp/providers/authontication/authontication_screen_provider.dart';
 import 'package:flutterapp/screens/homeview/home_sreen.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:flutterapp/exception/myexception.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthonticationScreen extends StatefulWidget {
   @override
@@ -11,6 +11,20 @@ class AuthonticationScreen extends StatefulWidget {
 }
 
 class _AuthonticationScreenState extends State<AuthonticationScreen> {
+  @override
+  void initState() {
+  checkauth();
+    super.initState();
+  }
+ Future checkauth()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('isauth')) {
+      await Provider.of<AuthonticationScreenProvider>(context,listen: false).tryautologin();
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (ctx) => HomeScreen()));
+    }
+  }
+
   final GlobalKey<FormState> _formKey = GlobalKey();
   var logindata = {'email': '', 'password': ''};
   var registerdata = {
@@ -20,27 +34,70 @@ class _AuthonticationScreenState extends State<AuthonticationScreen> {
     'country': '',
     'phone': '',
   };
-  Future<void> submit(String formtype)async{
+
+  void showerrordialog(String massage) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: Text('sorry an error occured'),
+              content: Text(massage),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('ok'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            ));
+  }
+
+  Future<void> submit(String formtype) async {
     if (!_formKey.currentState.validate()) {
       return;
     } else {
       _formKey.currentState.save();
       Provider.of<AuthonticationScreenProvider>(context, listen: false)
           .toogleCheck();
-      if (formtype == 'login') {
-        await Provider.of<AuthonticationScreenProvider>(context, listen: false)
-            .authonticate(logindata['email'], logindata['password'],
-            'signInWithPassword');
+      try {
+        if (formtype == 'login') {
+          await Provider.of<AuthonticationScreenProvider>(context,
+                  listen: false)
+              .authonticate(logindata['email'], logindata['password'],
+                  'signInWithPassword');
+          Provider.of<AuthonticationScreenProvider>(context, listen: false)
+              .toogleCheck();
+        } else {
+          await Provider.of<AuthonticationScreenProvider>(context,
+                  listen: false)
+              .authonticate(
+                  registerdata['email'], registerdata['password'], 'signUp');
+          Provider.of<AuthonticationScreenProvider>(context, listen: false)
+              .toogleCheck();
+        }
+        Navigator.pushReplacementNamed(context, HomeScreen.routeforhomescree);
+      } on myException catch (myexceptionerrorerror) {
+        var errormesssage = 'failed autontication';
+        if (myexceptionerrorerror.messege.contains('EMAIL_EXISTS')) {
+          errormesssage = 'sorry this email is already exists';
+        } else if (myexceptionerrorerror.messege.contains('INVALID_EMAIL')) {
+          errormesssage = 'this is not valid email address';
+        } else if (myexceptionerrorerror.messege.contains('WEAK_PASSWORD')) {
+          errormesssage = 'this is too short password ';
+        } else if (myexceptionerrorerror.messege.contains('EMAIL_NOT_FOUND')) {
+          errormesssage = 'sorry this email not found';
+        } else if (myexceptionerrorerror.messege.contains('INVALID_PASSWORD')) {
+          errormesssage = 'this invalid password';
+        }
+        showerrordialog(errormesssage);
         Provider.of<AuthonticationScreenProvider>(context, listen: false)
             .toogleCheck();
-      } else {
-        await Provider.of<AuthonticationScreenProvider>(context, listen: false)
-            .authonticate(
-            registerdata['email'], registerdata['password'], 'signUp');
+      } catch (generalerror) {
+        var err = 'sorry we cant authontocate you now please try again later';
+        showerrordialog(err);
         Provider.of<AuthonticationScreenProvider>(context, listen: false)
             .toogleCheck();
       }
-      Navigator.pushReplacementNamed(context, HomeScreen.routeforhomescree);
     }
   }
 
@@ -61,8 +118,8 @@ class _AuthonticationScreenState extends State<AuthonticationScreen> {
           borderRadius: provider.inloginscreen()
               ? BorderRadius.only(bottomRight: Radius.circular(185))
               : BorderRadius.only(
-                  bottomRight: Radius.circular(185),
-                  bottomLeft: Radius.circular(185))),
+                  bottomLeft: Radius.elliptical(devicesize.width, 80),
+                  bottomRight: Radius.elliptical(devicesize.width, 80))),
       child: Align(
         alignment:
             provider.inloginscreen() ? Alignment(-.7, 0) : Alignment(0, 0),
@@ -120,16 +177,19 @@ class _AuthonticationScreenState extends State<AuthonticationScreen> {
                     Divider()
                   ],
                 ),
-provider.isloading?CircularProgressIndicator():
-              RaisedButton(
-                  onPressed:()=>provider.inloginscreen()?submit('login'):submit('signup'),
-                  child: Text(
-                    'ok',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  color:Colors.blue),
+              provider.isloading
+                  ? CircularProgressIndicator()
+                  : RaisedButton(
+                      onPressed: () => provider.inloginscreen()
+                          ? submit('login')
+                          : submit('signup'),
+                      child: Text(
+                        'ok',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      color: Colors.blue),
               Container(
                 margin: EdgeInsets.only(top: 6),
                 child: InkWell(
@@ -168,7 +228,11 @@ provider.isloading?CircularProgressIndicator():
             margin: EdgeInsets.only(left: 16),
             child: Align(
               alignment: Alignment.topLeft,
-              child: TextFormField(obscureText:hinttext=='Password'||hinttext=='confirm Password'?true:false,
+              child: TextFormField(
+                obscureText:
+                    hinttext == 'Password' || hinttext == 'confirm Password'
+                        ? true
+                        : false,
                 decoration: InputDecoration(
                     hintText: hinttext,
                     hintStyle: TextStyle(fontSize: 20),
@@ -203,21 +267,20 @@ provider.isloading?CircularProgressIndicator():
                       logindata['email'] = value;
                     }
                     if (hinttext == 'Password') {
-                    logindata['password']=value;
+                      logindata['password'] = value;
                     }
-
                   } else {
                     if (hinttext == 'Email') {
                       registerdata['email'] = value;
                     }
                     if (hinttext == 'Password') {
-                      registerdata['password']=value;
+                      registerdata['password'] = value;
                     }
                     if (hinttext == 'confirmPassword') {
-                      registerdata['confirmpassword']=value;
+                      registerdata['confirmpassword'] = value;
                     }
                     if (hinttext == 'Phone') {
-                      registerdata['phone']=value;
+                      registerdata['phone'] = value;
                     }
                   }
                 },
